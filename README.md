@@ -12,6 +12,9 @@ npm install
 npm run dev      # http://localhost:5180
 ```
 
+The current build of `main` runs at
+**<https://kylev202.github.io/WebBuilder/>**.
+
 ## What you can do
 
 **Build without knowing anything**
@@ -154,6 +157,29 @@ and theme tokens all survive a trip through generated code, hand edits land on
 the right nodes, and invalid code throws instead of destroying anything.
 `check:app` mounts the whole app and clicks through it — adding elements,
 editing, undo/redo, panels, the code panel, templates and saving.
+
+## Deploying
+
+Every push to `main` builds the app and publishes it to GitHub Pages, via
+`.github/workflows/deploy.yml`. The checks above run first, so a failing suite
+stops the deploy rather than shipping past it. You can also trigger a run by
+hand from the Actions tab.
+
+The site is served from the `gh-pages` branch, which holds build output and
+nothing else — each deploy replaces it wholesale, so no history of generated
+files piles up in the repository.
+
+Vite's `base` is relative, so the built bundle resolves its own assets wherever
+it is served from — the `/WebBuilder/` project-site path, a custom domain, or
+`dist/index.html` opened straight off disk.
+
+## The icon
+
+`npm run icons` regenerates the favicon set in `public/` — the SVG, a
+multi-resolution `.ico`, the Apple touch icon and a 512px version for link
+previews. All of them come from the single geometry definition at the top of
+`scripts/make-icons.mjs`, so editing that one block moves every size at once
+and the vector can never drift from the raster.
 
 ## Notes and limits
 

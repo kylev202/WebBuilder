@@ -5,10 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Pushing the built site to the gh-pages branch is all this needs.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 # Let a running deploy finish rather than cancelling it mid-publish.
 concurrency:
@@ -16,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,22 +33,19 @@ jobs:
       - name: Build
         run: npm run build
 
-      # `enablement` turns Pages on the first time this runs, so the repo needs
-      # no manual setup beyond allowing Actions to write to Pages.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+      # gh-pages holds build output only, so each deploy replaces it outright
+      # rather than accumulating a history of generated files.
+      - name: Publish to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          touch dist/.nojekyll
+          cd dist
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Deploy ${GITHUB_SHA:0:7}"
+          git push -q --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            gh-pages

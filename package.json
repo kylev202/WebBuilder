@@ -6,6 +6,7 @@
   "description": "Visual app builder for non-technical creators, with live two-way code sync.",
   "scripts": {
     "dev": "vite",
+    "icons": "node scripts/make-icons.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "check": "npm run check:roundtrip && npm run check:app",
